@@ -293,12 +293,12 @@
         }
     </style>
     <script type="module">
-      // IMPORTANT: You need to get your own API key from Google AI Studio.
-      // Go to https://aistudio.google.com/app/apikey to create one.
-      // Replace "YOUR_API_KEY" with your actual key.
+      // IMPORTANTE: La API key se ha dejado visible para fines de demostración de este proyecto.
+      // En un entorno de producción, esta clave NUNCA debe estar en el lado del cliente (frontend).
+      // Debería ser gestionada a través de un backend seguro que actúe como intermediario.
       const API_KEY = "AIzaSyCKYf3Qq6j0Lfve3_0G3vtZHIN-zm8-U-w"; 
 
-      // Do not edit the code below this line
+      // No editar el código debajo de esta línea
       try {
         const { GoogleGenerativeAI } = await import("https://esm.run/@google/generative-ai");
         if (API_KEY.startsWith("YOUR_API" + "_KEY")) {
@@ -1456,260 +1456,205 @@
             initializeMermaidControls();
         });
         
-        // Function for Mermaid Controls
+        // Función para inicializar los controles de zoom y paneo en los diagramas de Mermaid
         function initializeMermaidControls() {
             const containers = document.querySelectorAll('.mermaid-container');
 
             containers.forEach(container => {
-            const mermaidElement = container.querySelector('.mermaid');
-            let scale = 1;
-            let isDragging = false;
-            let startX, startY, translateX = 0, translateY = 0;
+                const mermaidElement = container.querySelector('.mermaid');
+                let scale = 1;
+                let isDragging = false;
+                let startX, startY, translateX = 0, translateY = 0;
 
-            // 触摸相关状态
-            let isTouch = false;
-            let touchStartTime = 0;
-            let initialDistance = 0;
-            let initialScale = 1;
-            let isPinching = false;
+                // Variables para gestionar los eventos táctiles (touch)
+                let isTouch = false;
+                let touchStartTime = 0;
+                let initialDistance = 0;
+                let initialScale = 1;
+                let isPinching = false;
 
-            // Zoom controls
-            const zoomInBtn = container.querySelector('.zoom-in');
-            const zoomOutBtn = container.querySelector('.zoom-out');
-            const resetBtn = container.querySelector('.reset-zoom');
-            const fullscreenBtn = container.querySelector('.fullscreen');
+                // Controles de Zoom
+                const zoomInBtn = container.querySelector('.zoom-in');
+                const zoomOutBtn = container.querySelector('.zoom-out');
+                const resetBtn = container.querySelector('.reset-zoom');
+                const fullscreenBtn = container.querySelector('.fullscreen');
 
-            function updateTransform() {
-                mermaidElement.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
-
-                if (scale > 1) {
-                container.classList.add('zoomed');
-                } else {
-                container.classList.remove('zoomed');
+                function updateTransform() {
+                    mermaidElement.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+                    container.classList.toggle('zoomed', scale > 1);
+                    mermaidElement.style.cursor = isDragging ? 'grabbing' : 'grab';
                 }
 
-                mermaidElement.style.cursor = isDragging ? 'grabbing' : 'grab';
-            }
-
-            if (zoomInBtn) {
-                zoomInBtn.addEventListener('click', () => {
-                scale = Math.min(scale * 1.25, 4);
-                updateTransform();
-                });
-            }
-
-            if (zoomOutBtn) {
-                zoomOutBtn.addEventListener('click', () => {
-                scale = Math.max(scale / 1.25, 0.3);
-                if (scale <= 1) {
-                    translateX = 0;
-                    translateY = 0;
+                if (zoomInBtn) {
+                    zoomInBtn.addEventListener('click', () => {
+                        scale = Math.min(scale * 1.25, 4);
+                        updateTransform();
+                    });
                 }
-                updateTransform();
-                });
-            }
 
-            if (resetBtn) {
-                resetBtn.addEventListener('click', () => {
-                scale = 1;
-                translateX = 0;
-                translateY = 0;
-                updateTransform();
-                });
-            }
-
-            if (fullscreenBtn) {
-                fullscreenBtn.addEventListener('click', () => {
-                    if (document.fullscreenElement !== container) {
-                        container.requestFullscreen();
-                    } else {
-                        if (document.exitFullscreen) {
-                            document.exitFullscreen();
+                if (zoomOutBtn) {
+                    zoomOutBtn.addEventListener('click', () => {
+                        scale = Math.max(scale / 1.25, 0.3);
+                        if (scale <= 1) {
+                            translateX = 0;
+                            translateY = 0;
                         }
+                        updateTransform();
+                    });
+                }
+
+                if (resetBtn) {
+                    resetBtn.addEventListener('click', () => {
+                        scale = 1;
+                        translateX = 0;
+                        translateY = 0;
+                        updateTransform();
+                    });
+                }
+
+                if (fullscreenBtn) {
+                    fullscreenBtn.addEventListener('click', () => {
+                        if (!document.fullscreenElement) {
+                            container.requestFullscreen();
+                        } else {
+                            if (document.exitFullscreen) {
+                                document.exitFullscreen();
+                            }
+                        }
+                    });
+                }
+
+                // Listener para actualizar el icono de pantalla completa al usar 'Esc'
+                document.addEventListener('fullscreenchange', () => {
+                    const icon = fullscreenBtn.querySelector('i');
+                    const isFullscreenNow = document.fullscreenElement === container;
+                    if (isFullscreenNow) {
+                        icon.classList.replace('fa-expand', 'fa-compress');
+                        fullscreenBtn.setAttribute('title', 'Salir de pantalla completa');
+                    } else {
+                        icon.classList.replace('fa-compress', 'fa-expand');
+                        fullscreenBtn.setAttribute('title', 'Pantalla completa');
                     }
                 });
-            }
 
-            // We add a listener to the document to catch all fullscreen changes,
-            // including pressing the 'Esc' key.
-            document.addEventListener('fullscreenchange', () => {
-                const icon = fullscreenBtn.querySelector('i');
-                const isFullscreenNow = document.fullscreenElement === container;
-
-                if (isFullscreenNow) {
-                    icon.classList.remove('fa-expand');
-                    icon.classList.add('fa-compress');
-                    fullscreenBtn.setAttribute('title', 'Salir de pantalla completa');
-                } else {
-                    icon.classList.remove('fa-compress');
-                    icon.classList.add('fa-expand');
-                    fullscreenBtn.setAttribute('title', 'Pantalla completa');
-                }
-            });
-
-            // Mouse Events
-            mermaidElement.addEventListener('mousedown', (e) => {
-                if (isTouch) return; // 如果是触摸设备，忽略鼠标事件
-
-                isDragging = true;
-                startX = e.clientX - translateX;
-                startY = e.clientY - translateY;
-                mermaidElement.style.cursor = 'grabbing';
-                updateTransform();
-                e.preventDefault();
-            });
-
-            document.addEventListener('mousemove', (e) => {
-                if (isDragging && !isTouch) {
-                translateX = e.clientX - startX;
-                translateY = e.clientY - startY;
-                updateTransform();
-                }
-            });
-
-            document.addEventListener('mouseup', () => {
-                if (isDragging && !isTouch) {
-                isDragging = false;
-                mermaidElement.style.cursor = 'grab';
-                updateTransform();
-                }
-            });
-
-            document.addEventListener('mouseleave', () => {
-                if (isDragging && !isTouch) {
-                isDragging = false;
-                mermaidElement.style.cursor = 'grab';
-                updateTransform();
-                }
-            });
-
-            // 获取两点之间的距离
-            function getTouchDistance(touch1, touch2) {
-                return Math.hypot(
-                touch2.clientX - touch1.clientX,
-                touch2.clientY - touch1.clientY
-                );
-            }
-
-            // Touch Events - 触摸事件处理
-            mermaidElement.addEventListener('touchstart', (e) => {
-                isTouch = true;
-                touchStartTime = Date.now();
-
-                if (e.touches.length === 1) {
-                // 单指拖动
-                isPinching = false;
-                isDragging = true;
-
-                const touch = e.touches[0];
-                startX = touch.clientX - translateX;
-                startY = touch.clientY - translateY;
-
-                } else if (e.touches.length === 2) {
-                // 双指缩放
-                isPinching = true;
-                isDragging = false;
-
-                const touch1 = e.touches[0];
-                const touch2 = e.touches[1];
-                initialDistance = getTouchDistance(touch1, touch2);
-                initialScale = scale;
-                }
-
-                e.preventDefault();
-            }, { passive: false });
-
-            mermaidElement.addEventListener('touchmove', (e) => {
-                if (e.touches.length === 1 && isDragging && !isPinching) {
-                // 单指拖动
-                const touch = e.touches[0];
-                translateX = touch.clientX - startX;
-                translateY = touch.clientY - startY;
-                updateTransform();
-
-                } else if (e.touches.length === 2 && isPinching) {
-                // 双指缩放
-                const touch1 = e.touches[0];
-                const touch2 = e.touches[1];
-                const currentDistance = getTouchDistance(touch1, touch2);
-
-                if (initialDistance > 0) {
-                    const newScale = Math.min(Math.max(
-                    initialScale * (currentDistance / initialDistance),
-                    0.3
-                    ), 4);
-                    scale = newScale;
+                // --- Eventos de Ratón (Mouse) ---
+                mermaidElement.addEventListener('mousedown', (e) => {
+                    // Si es un evento táctil, ignorar los de ratón para evitar conflictos
+                    if (isTouch) return;
+                    isDragging = true;
+                    startX = e.clientX - translateX;
+                    startY = e.clientY - translateY;
                     updateTransform();
+                    e.preventDefault();
+                });
+
+                document.addEventListener('mousemove', (e) => {
+                    if (isDragging && !isTouch) {
+                        translateX = e.clientX - startX;
+                        translateY = e.clientY - startY;
+                        updateTransform();
+                    }
+                });
+
+                document.addEventListener('mouseup', () => {
+                    if (isDragging && !isTouch) {
+                        isDragging = false;
+                        updateTransform();
+                    }
+                });
+
+                document.addEventListener('mouseleave', () => {
+                    if (isDragging && !isTouch) {
+                        isDragging = false;
+                        updateTransform();
+                    }
+                });
+
+                // Función auxiliar para calcular la distancia entre dos puntos táctiles
+                function getTouchDistance(touch1, touch2) {
+                    return Math.hypot(touch2.clientX - touch1.clientX, touch2.clientY - touch1.clientY);
                 }
-                }
 
-                e.preventDefault();
-            }, { passive: false });
+                // --- Eventos Táctiles (Touch) ---
+                mermaidElement.addEventListener('touchstart', (e) => {
+                    isTouch = true;
+                    if (e.touches.length === 1) {
+                        // Arrastrar con un solo dedo
+                        isPinching = false;
+                        isDragging = true;
+                        const touch = e.touches[0];
+                        startX = touch.clientX - translateX;
+                        startY = touch.clientY - translateY;
+                    } else if (e.touches.length === 2) {
+                        // Zoom con dos dedos (pellizco)
+                        isPinching = true;
+                        isDragging = false;
+                        const [touch1, touch2] = e.touches;
+                        initialDistance = getTouchDistance(touch1, touch2);
+                        initialScale = scale;
+                    }
+                    e.preventDefault();
+                }, { passive: false });
 
-            mermaidElement.addEventListener('touchend', (e) => {
-                // 重置状态
-                if (e.touches.length === 0) {
-                isDragging = false;
-                isPinching = false;
-                initialDistance = 0;
+                mermaidElement.addEventListener('touchmove', (e) => {
+                    if (e.touches.length === 1 && isDragging && !isPinching) {
+                        // Mover con un dedo
+                        const touch = e.touches[0];
+                        translateX = touch.clientX - startX;
+                        translateY = touch.clientY - startY;
+                        updateTransform();
+                    } else if (e.touches.length === 2 && isPinching) {
+                        // Escalar con dos dedos
+                        const [touch1, touch2] = e.touches;
+                        const currentDistance = getTouchDistance(touch1, touch2);
+                        if (initialDistance > 0) {
+                            scale = Math.min(Math.max(initialScale * (currentDistance / initialDistance), 0.3), 4);
+                            updateTransform();
+                        }
+                    }
+                    e.preventDefault();
+                }, { passive: false });
 
-                // 延迟重置isTouch，避免鼠标事件立即触发
-                setTimeout(() => {
-                    isTouch = false;
-                }, 100);
-                } else if (e.touches.length === 1 && isPinching) {
-                // 从双指变为单指，切换为拖动模式
-                isPinching = false;
-                isDragging = true;
+                mermaidElement.addEventListener('touchend', (e) => {
+                    // Si se levantan todos los dedos, se resetean los estados
+                    if (e.touches.length === 0) {
+                        isDragging = false;
+                        isPinching = false;
+                        // Pequeño retardo para evitar que se disparen eventos de ratón inmediatamente
+                        setTimeout(() => { isTouch = false; }, 100);
+                    } else if (e.touches.length === 1 && isPinching) {
+                        // Si se pasa de dos dedos a uno, se cambia a modo de arrastre
+                        isPinching = false;
+                        isDragging = true;
+                        const touch = e.touches[0];
+                        startX = touch.clientX - translateX;
+                        startY = touch.clientY - translateY;
+                    }
+                    updateTransform();
+                });
 
-                const touch = e.touches[0];
-                startX = touch.clientX - translateX;
-                startY = touch.clientY - translateY;
-                }
+                // --- Evento de Rueda del Ratón (Scroll) para Zoom ---
+                container.addEventListener('wheel', (e) => {
+                    e.preventDefault();
+                    const delta = e.deltaY > 0 ? 0.9 : 1.1; // Zoom out si scroll es hacia abajo, zoom in si es hacia arriba
+                    const newScale = Math.min(Math.max(scale * delta, 0.3), 4);
 
+                    if (newScale !== scale) {
+                        const scaleDiff = newScale / scale;
+                        translateX *= scaleDiff;
+                        translateY *= scaleDiff;
+                        scale = newScale;
+
+                        if (scale <= 1) {
+                            translateX = 0;
+                            translateY = 0;
+                        }
+                        updateTransform();
+                    }
+                });
+
+                // Inicializar la visualización
                 updateTransform();
-            });
-
-            mermaidElement.addEventListener('touchcancel', (e) => {
-                isDragging = false;
-                isPinching = false;
-                initialDistance = 0;
-
-                setTimeout(() => {
-                isTouch = false;
-                }, 100);
-
-                updateTransform();
-            });
-
-            // Enhanced wheel zoom with better center point handling
-            container.addEventListener('wheel', (e) => {
-                e.preventDefault();
-                const rect = container.getBoundingClientRect();
-                const centerX = rect.width / 2;
-                const centerY = rect.height / 2;
-
-                const delta = e.deltaY > 0 ? 0.9 : 1.1;
-                const newScale = Math.min(Math.max(scale * delta, 0.3), 4);
-
-                // Adjust translation to zoom towards center
-                if (newScale !== scale) {
-                const scaleDiff = newScale / scale;
-                translateX = translateX * scaleDiff;
-                translateY = translateY * scaleDiff;
-                scale = newScale;
-
-                if (scale <= 1) {
-                    translateX = 0;
-                    translateY = 0;
-                }
-
-                updateTransform();
-                }
-            });
-
-            // Initialize display
-            updateTransform();
             });
         }
 
@@ -1780,104 +1725,124 @@
             });
         });
 
-        // AI Assistant Logic (CORRECTED AND IMPROVED)
+        // Lógica del Asistente de IA
         document.addEventListener('DOMContentLoaded', function() {
             const askBtn = document.getElementById('ask-ai-btn');
             const questionInput = document.getElementById('ai-question');
             const responseContainer = document.getElementById('ai-response-container');
 
-        async function handleAIQuery() {
-            const question = questionInput.value;
-            if (!question) {
-                responseContainer.innerHTML = '<p class="text-red-500">Por favor, escribe una pregunta.</p>';
-                return;
-            }
-            if (!window.genAI) {
-                responseContainer.innerHTML = '<p class="text-red-500">El servicio de IA no está configurado.</p>';
-                return;
-            }
-
-            responseContainer.innerHTML = '<p class="text-charcoal/60 animate-pulse">Consultando fuentes...</p>';
-            askBtn.disabled = true;
-            askBtn.classList.add('opacity-50');
-
-            try {
-                // MEJORA #1: Usar 'systemInstruction' para definir el rol y las reglas
-                const systemInstruction = {
-                    role: "model",
-                    parts: [{ text: `
-<instructions>
-    <role>
-        Eres un Asistente Legal de IA, un experto en la Normativa Ambiental de México. Tu única directiva es responder basándote EXCLUSIVAMENTE en información de los dominios gubernamentales: \`gob.mx\` y \`paot.org.mx\`. Eres preciso, formal y siempre citas tus fuentes.
-    </role>
-
-    <rules>
-        <rule id="1" importance="CRITICAL">
-            **PROHIBICIÓN TOTAL:** Tienes estrictamente prohibido usar o citar blogs, noticias, sitios de empresas (consultoras, etc.), Wikipedia, YouTube o cualquier fuente fuera de los dominios permitidos. La violación de esta regla es un fallo crítico.
-        </rule>
-        <rule id="2" importance="MANDATORY">
-            **FORMATO DE RESPUESTA:**
-            1.  Comienza con un resumen conciso y directo de la información.
-            2.  Usa listas con viñetas (*) y negritas (**) para estructurar los detalles.
-            3.  Al final, incluye un título \`### Fuentes Oficiales\`.
-            4.  Bajo ese título, lista como enlaces Markdown cada una de las URLs de \`.gob.mx\` o \`.paot.org.mx\` que usaste. Ejemplo: \`* [Título del Documento](https://www.gob.mx/...)\`.
-        </rule>
-        <rule id="3" importance="MANDATORY">
-            **PROTOCOLO DE FALLO:** Si no encuentras una respuesta en las fuentes permitidas, ignora todo lo demás y responde únicamente: "No he podido encontrar una respuesta para esa consulta dentro de las fuentes gubernamentales oficiales de México."
-        </rule>
-    </rules>
-</instructions>
-                    `}],
-                };
-
-                const model = window.genAI.getGenerativeModel({ 
-                    model: "gemini-2.5-flash",
-                    tools: [{googleSearch: {}}],
-                    systemInstruction: systemInstruction,
-                });
-
-                // MEJORA #2: Usar 'generationConfig' para controlar la creatividad
-                const generationConfig = {
-                    temperature: 0.2, // Muy bajo para respuestas basadas en hechos, no en creatividad.
-                    topK: 32,
-                    topP: 0.9,
-                    maxOutputTokens: 8192,
-                };
-
-                // El prompt ahora solo contiene la pregunta del usuario, es mucho más limpio.
-                const prompt = question;
-
-                const result = await model.generateContent(prompt, generationConfig);
-                const response = result.response;
-
-                if (!response || !response.candidates || response.candidates.length === 0 || !response.text) {
-                    let feedback = response?.promptFeedback;
-                    let reason = feedback?.blockReason ? `Razón: ${feedback.blockReason}` : 'No se recibió una respuesta válida del modelo.';
-                    responseContainer.innerHTML = `<p class="text-red-500">La respuesta no pudo ser generada. ${reason}</p>`;
+            /**
+             * Gestiona la consulta del usuario al Asistente de IA.
+             * Se activa al hacer clic en el botón "Preguntar" o al presionar Enter en el campo de texto.
+             */
+            async function handleAIQuery() {
+                const question = questionInput.value;
+                // Validación: no enviar si la pregunta está vacía.
+                if (!question) {
+                    responseContainer.innerHTML = '<p class="text-red-500">Por favor, escribe una pregunta.</p>';
                     return;
                 }
-                
-                const text = response.text();
-                const formattedText = marked.parse(text);
-                
-                responseContainer.innerHTML = formattedText;
-
-            } catch (error) {
-                console.error("Error fetching AI response:", error);
-                if (error.toString().includes('429')) {
-                     responseContainer.innerHTML = '<p class="text-orange-500">Has alcanzado el límite de solicitudes. Por favor, espera un minuto.</p>';
-                } else {
-                     responseContainer.innerHTML = '<p class="text-red-500">Hubo un error al contactar al asistente. Revisa la consola.</p>';
+                // Validación: verificar que el servicio de IA se haya cargado correctamente.
+                if (!window.genAI) {
+                    responseContainer.innerHTML = '<p class="text-red-500">El servicio de IA no está configurado o no se pudo cargar.</p>';
+                    return;
                 }
-            } finally {
-                setTimeout(() => {
-                    askBtn.disabled = false;
-                    askBtn.classList.remove('opacity-50');
-                }, 4000);
-            }
-        }
 
+                // Actualización de la UI para indicar que se está procesando la pregunta.
+                responseContainer.innerHTML = '<p class="text-charcoal/60 animate-pulse">Consultando fuentes oficiales...</p>';
+                askBtn.disabled = true;
+                askBtn.classList.add('opacity-50');
+
+                try {
+                    // INSTRUCCIÓN DE SISTEMA: Este es el "cerebro" del asistente.
+                    // Define su rol, sus reglas y cómo debe comportarse. Es la parte más importante del prompt engineering.
+                    const systemInstruction = {
+                        role: "model",
+                        parts: [{ text: `
+    <instructions>
+        <role>
+            Eres un Asistente Legal de IA, un experto en la Normativa Ambiental de México. Tu única directiva es responder basándote EXCLUSIVAMENTE en información de los dominios gubernamentales: \`gob.mx\` y \`paot.org.mx\`. Eres preciso, formal y siempre citas tus fuentes.
+        </role>
+
+        <rules>
+            <rule id="1" importance="CRITICAL">
+                **PROHIBICIÓN TOTAL:** Tienes estrictamente prohibido usar o citar blogs, noticias, sitios de empresas (consultoras, etc.), Wikipedia, YouTube o cualquier fuente fuera de los dominios permitidos. La violación de esta regla es un fallo crítico.
+            </rule>
+            <rule id="2" importance="MANDATORY">
+                **FORMATO DE RESPUESTA:**
+                1.  Comienza con un resumen conciso y directo de la información.
+                2.  Usa listas con viñetas (*) y negritas (**) para estructurar los detalles.
+                3.  Al final, incluye un título \`### Fuentes Oficiales\`.
+                4.  Bajo ese título, lista como enlaces Markdown cada una de las URLs de \`.gob.mx\` o \`.paot.org.mx\` que usaste. Ejemplo: \`* [Título del Documento](https://www.gob.mx/...)\`.
+            </rule>
+            <rule id="3" importance="MANDATORY">
+                **PROTOCOLO DE FALLO:** Si no encuentras una respuesta en las fuentes permitidas, ignora todo lo demás y responde únicamente: "No he podido encontrar una respuesta para esa consulta dentro de las fuentes gubernamentales oficiales de México."
+            </rule>
+        </rules>
+    </instructions>
+                        `}],
+                    };
+
+                    // CONFIGURACIÓN DEL MODELO:
+                    // Se especifica el modelo a usar ('gemini-1.5-flash' es rápido y eficiente).
+                    // 'tools': Se habilita la herramienta de búsqueda en Google para que el modelo pueda consultar los dominios permitidos.
+                    // 'systemInstruction': Se aplican las reglas definidas arriba.
+                    const model = window.genAI.getGenerativeModel({
+                        model: "gemini-1.5-flash",
+                        tools: [{googleSearch: {}}],
+                        systemInstruction: systemInstruction,
+                    });
+
+                    // CONFIGURACIÓN DE GENERACIÓN:
+                    // 'temperature': Un valor bajo (0.2) hace que el modelo sea más determinista y factual, evitando que "invente" respuestas.
+                    const generationConfig = {
+                        temperature: 0.2,
+                        topK: 32,
+                        topP: 0.9,
+                        maxOutputTokens: 8192,
+                    };
+
+                    // El prompt final es simplemente la pregunta del usuario.
+                    const prompt = question;
+
+                    // Llamada al modelo para generar contenido.
+                    const result = await model.generateContent(prompt, generationConfig);
+                    const response = result.response;
+
+                    // Manejo de la respuesta: verificar si es válida o si fue bloqueada.
+                    if (!response || !response.candidates || response.candidates.length === 0 || !response.text) {
+                        let feedback = response?.promptFeedback;
+                        let reason = feedback?.blockReason ? `Razón: ${feedback.blockReason}` : 'No se recibió una respuesta válida del modelo.';
+                        responseContainer.innerHTML = `<p class="text-red-500">La respuesta no pudo ser generada. ${reason}</p>`;
+                        return;
+                    }
+
+                    // Se obtiene el texto y se formatea de Markdown a HTML usando la librería 'marked'.
+                    const text = response.text();
+                    const formattedText = marked.parse(text);
+
+                    responseContainer.innerHTML = formattedText;
+
+                } catch (error) {
+                    // Manejo de errores de red o de la API.
+                    console.error("Error al obtener la respuesta de la IA:", error);
+                    if (error.toString().includes('429')) { // Error de límite de peticiones
+                         responseContainer.innerHTML = '<p class="text-orange-500">Se ha alcanzado el límite de solicitudes. Por favor, espera un minuto.</p>';
+                    } else {
+                         responseContainer.innerHTML = '<p class="text-red-500">Hubo un error al contactar al asistente. Revisa la consola del navegador para más detalles.</p>';
+                    }
+                } finally {
+                    // Se reactiva el botón después de un breve tiempo para evitar spam de peticiones.
+                    setTimeout(() => {
+                        askBtn.disabled = false;
+                        askBtn.classList.remove('opacity-50');
+                    }, 3000);
+                }
+            }
+
+            // Asignar el evento 'click' al botón para ejecutar la consulta.
             askBtn.addEventListener('click', handleAIQuery);
+            // Permitir que el usuario envíe la consulta presionando 'Enter'.
             questionInput.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     handleAIQuery();
