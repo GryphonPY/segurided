@@ -2,7 +2,7 @@
 
 Estimada Profesora,
 
-Este documento detalla el estado actual del proyecto de la página web sobre el **Marco Normativo Ambiental Mexicano**. Mi objetivo es explicarle de forma clara las capacidades del proyecto y, más importante aún, las consideraciones técnicas y de seguridad para su posible uso a futuro.
+Este documento detalla el estado actual del proyecto de la página web sobre el **Marco Normativo Ambiental Mexicano**. Mi objetivo es explicarle de forma clara las capacidades del proyecto y, más importante aún, las consideraciones que deje de lado al ser un proyecto pequeño, técnicas y de seguridad para su posible uso a futuro que quiera escalarlo.
 
 ---
 
@@ -30,7 +30,7 @@ Es como pagar el recibo de la luz: se paga solo por lo que se consume. Cada vez 
 - **Desventajas:** Si muchas personas usan la página, la "factura" mensual podría ser alta.
 
 #### Opción 2: Usar un modelo de IA "Gratuito" (Open Source)
-Es como construir nuestra propia planta de energía en lugar de pagarle a la compañía eléctrica. El programa de IA es gratis, pero nosotros tendríamos que comprar y mantener las computadoras.
+Es como construir nuestra propia planta de energía en lugar de pagarle a la compañía eléctrica. usar un modelo de inteligencia artifical como chatgpt pero desarrollado por personas que decidieron dejarlo al publico, pero alojandolo y corriendo en servidores de la utt, El programa de IA es gratis, pero nosotros tendríamos que comprar y mantener las computadoras.
 - **Ventajas:** Se tiene control total y no se paga por cada pregunta.
 - **Desventajas:** Se necesita equipo muy potente y costoso (servidores con tarjetas gráficas especiales, o GPUs) y personal técnico que lo mantenga funcionando. La inversión inicial es muy alta.
 
@@ -49,7 +49,7 @@ Es crucial entender que la IA no es perfecta:
 
 ### 🛠️ Soporte y Ayuda
 
-A pesar de sus limitaciones, la herramienta es muy potente. Si en el futuro la utiliza y encuentra un error que pueda replicar, con gusto puedo ayudar a revisarlo. Un **video corto mostrando el problema** sería ideal para entender qué está pasando y poder solucionarlo.
+A pesar de que me menciono que la herramienta no funcionaba yo la probe y realmente todo funciona bien si puede mandarme un clip replicando el error con gusto veo que sucede y se lo corrijo
 
 ---
 
